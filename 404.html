@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - 页面未找到</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="config.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">🧸 童心小窝</a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">☰</button>
+    <ul class="nav-links" id="nav-links">
+      <script>
+        if (typeof CONFIG !== 'undefined' && CONFIG.nav) {
+          for (var i = 0; i < CONFIG.nav.length; i++) {
+            var item = CONFIG.nav[i];
+            document.write('<li><a href="' + item.url + '">' + item.icon + ' ' + item.label + '</a></li>');
+          }
+        }
+      </script>
+      <li><button class="theme-toggle" id="theme-btn" aria-label="切换主题">🌙</button></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="main" style="min-height: calc(100vh - 56px);display:flex;align-items:center;">
+  <div class="container">
+    <div class="page-404">
+      <span class="emoji-big">🔍</span>
+      <h1>404</h1>
+      <p>哎呀，这个页面好像迷路了……<br>就像小时候弄丢的那颗弹珠</p>
+      <a href="index.html" class="btn-home">🏠 回首页看看</a>
+    </div>
+  </div>
+</main>
+
+<script src="js/snow.js"></script>
+<script src="js/main.js"></script>
+<script>
+  if (typeof CONFIG !== 'undefined' && CONFIG.snow && CONFIG.snow.enable) {
+    Snow.init(CONFIG.snow);
+  }
+</script>
+</body>
+</html>
