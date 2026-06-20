@@ -21,7 +21,7 @@ blog-main/
 │   └── style.css     # Global styles (responsive + whimsical)
 ├── js/
 │   ├── config.js     # Configuration (personal info, snow params, etc.)
-│   ├── snow.js       # ❄️ Snowflake animation (DOM-based)
+│   ├── snow.js       # ❄️ Snowflake animation (Canvas 2D)
 │   └── main.js       # Core functionality (theme toggle, nav, Markdown render)
 ├── posts/            # Article directory
 │   ├── posts.json    # Article metadata (title, date, category, excerpt)
@@ -82,7 +82,7 @@ For local images, place the image in the project directory and use a relative pa
 |---------|-------------|
 | 📱 Responsive Layout | Adapts to phones, tablets, and desktops |
 | 🌗 Dark/Light Mode | One-click toggle with auto-saved preference |
-| ❄️ Snow Animation | ❄️ emoji DOM rendering, configurable |
+| ❄️ Snow Animation | Canvas 2D rendering, HiDPI support, smooth scrolling |
 | 📝 Markdown Rendering | Native JS parser, zero dependencies |
 | 🏷️ Categories/Archive | Organize articles by category and date |
 | 🎨 Whimsical Style | Rounded corners, soft shadows, warm colors |
@@ -99,13 +99,15 @@ snow: {
 }
 ```
 
-Set `enable` to `false` to disable the snow effect.
+- Set `enable` to `false` to disable the snow effect.
+- Snowflake color is pure white (`rgba(255,255,255,opacity)`), opacity random 0.5~1.
+- Canvas 2D rendering, auto HiDPI support, smooth during scrolling.
 
 ## Tech Stack
 
 - **HTML5 + CSS3** — Semantic structure + CSS variable theming system
 - **Vanilla JavaScript** — Zero dependencies, lightweight
-- **CSS Animations + DOM** — ❄️ Snowflake rendering
+- **Canvas 2D + requestAnimationFrame** — ❄️ Snowflake rendering (HiDPI)
 - **GitHub Pages** — Static hosting
 
 ## License
