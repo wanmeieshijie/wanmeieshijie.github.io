@@ -4,10 +4,12 @@ var Snow = {
   animId: null,
   running: false,
   config: {},
+  isMobile: false,
 
   init: function(cfg) {
     this.config = cfg || CONFIG.snow || {};
     if (!this.config.enable) return;
+    this.isMobile = window.innerWidth < 768;
     this.createContainer();
     this.start();
   },
@@ -25,7 +27,7 @@ var Snow = {
     if (this.running) return;
     this.running = true;
     this.flakes = [];
-    var count = this.config.maxCount || 40;
+    var count = this.config.maxCount || (this.isMobile ? 20 : 40);
     for (var i = 0; i < count; i++) {
       this.flakes.push(this.createFlake(true));
     }
@@ -54,17 +56,16 @@ var Snow = {
     var h = window.innerHeight;
     var size = minSize + Math.random() * (maxSize - minSize);
     var norm = (size - minSize) / (maxSize - minSize);
+    var opacity = 0.5 + Math.random() * 0.5;
     var el = document.createElement('span');
     el.textContent = '❄';
-    el.style.cssText = 'position:absolute;left:0;top:0;font-size:' + size + 'px;line-height:1;white-space:nowrap;pointer-events:none;text-shadow:0 0 4px rgba(0,0,0,0.2),0 0 8px rgba(0,0,0,0.1);';
+    el.style.cssText = 'position:absolute;left:0;top:0;font-size:' + size + 'px;line-height:1;white-space:nowrap;pointer-events:none;color:rgba(255,255,255,' + opacity + ');text-shadow:0 0 4px rgba(0,0,0,0.2),0 0 8px rgba(0,0,0,0.1);will-change:transform;';
     this.container.appendChild(el);
     return {
       el: el,
       x: Math.random() * w,
       y: randomY ? Math.random() * h : -size,
-      size: size,
       speed: 0.6 + norm * 2.4,
-      opacity: 0.5 + Math.random() * 0.5,
       wind: -0.8 + Math.random() * 1.6,
       swayPhase: Math.random() * Math.PI * 2,
       swaySpeed: 0.005 + Math.random() * 0.015,
@@ -89,17 +90,14 @@ var Snow = {
       f.x += f.wind;
       f.y += f.speed;
       f.rot += f.rotSpeed;
-      if (f.y > h + f.size) {
-        f.y = -f.size;
+      if (f.y > h + 40) {
+        f.y = -40;
         f.x = Math.random() * w;
         f.wind = -0.8 + Math.random() * 1.6;
       }
       if (f.x < -60) f.x = w + 60;
       if (f.x > w + 60) f.x = -60;
-      var sway = Math.sin(f.swayPhase) * f.swayAmp;
-      f.el.style.transform = 'translate(' + (f.x + sway) + 'px,' + f.y + 'px) rotate(' + f.rot + 'rad)';
-      f.el.style.opacity = f.opacity;
-      f.el.style.color = 'rgba(255,255,255,' + f.opacity + ')';
+      f.el.style.transform = 'translate3d(' + (f.x + Math.sin(f.swayPhase) * f.swayAmp) + 'px,' + f.y + 'px,0) rotate(' + f.rot + 'rad)';
     }
   },
 
