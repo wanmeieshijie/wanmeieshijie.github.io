@@ -42,15 +42,16 @@ blog-main/
 ### 2. 添加文章
 
 1. 在 `posts/` 目录下创建 `.md` 文件，建议命名格式：`2026-01-01-文章标题.md`
-2. 编辑 `posts/posts.json`，添加文章元数据：
-```json
+2. 编辑 `posts/posts-data.js`，添加文章数据（含 `content` 字段为文章完整内容）：
+```javascript
 {
   "file": "2026-01-01-文章标题.md",
   "title": "文章标题",
   "date": "2026-01-01",
   "category": "分类名",
   "tags": ["标签1", "标签2"],
-  "excerpt": "文章摘要"
+  "excerpt": "文章摘要",
+  "content": "# 文章标题\n\n文章内容..."
 }
 ```
 
