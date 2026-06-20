@@ -1,4 +1,4 @@
-# 🧸 童心小窝 — GitHub Pages 个人博客
+# 🧸 魔法手记-啊勇 — GitHub Pages 个人博客
 
 一个充满**童趣风格**的个人静态博客，基于 GitHub Pages 部署，无需后端和数据库。
 

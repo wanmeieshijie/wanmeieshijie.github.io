@@ -1,19 +1,19 @@
 var CONFIG = {
   site: {
-    title: '童心小窝',
+    title: '魔法手记-啊勇',
     subtitle: '记录生活中的小确幸',
     description: '一个充满童趣的个人博客',
     author: '童心',
     avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=happy',
     since: '2026',
-    footer: '童心小窝 | 用童真的眼睛看世界'
+    footer: '魔法手记-啊勇 | 用童真的眼睛看世界'
   },
   hero: {
     enable: true,
     heightPC: 280,
     heightMobile: 160,
     imgUrl: 'https://images.unsplash.com/photo-1513530534585-c7b1394c6d51?w=1200&q=80',
-    mainTitle: '欢迎来到童心小窝',
+    mainTitle: '欢迎来到魔法手记-啊勇',
     subTitle: '这里住着一个不想长大的灵魂',
     maskGradient: 'rgba(255,240,245,0.4),rgba(220,235,255,0.4)'
   },
