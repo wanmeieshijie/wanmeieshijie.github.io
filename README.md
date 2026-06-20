@@ -1,3 +1,5 @@
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README_EN.md)
+
 # 🧸 魔法手记-啊勇 — GitHub Pages 个人博客
 
 一个充满**童趣风格**的个人静态博客，基于 GitHub Pages 部署，无需后端和数据库。
@@ -24,7 +26,8 @@ blog-main/
 ├── posts/            # 文章目录
 │   ├── posts.json    # 文章元数据（标题、日期、分类、摘要）
 │   └── *.md          # Markdown 文章
-└── README.md         # 本文件
+├── README.md         # 中文说明
+└── README_EN.md      # English README
 ```
 
 ## 快速开始
