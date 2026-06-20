@@ -577,6 +577,24 @@ a:hover {
   z-index: 9999;
 }
 
+/* Back link */
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--tag-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.back-link:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
 /* Loading */
 .loading {
   text-align: center;
