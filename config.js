@@ -19,12 +19,7 @@ var CONFIG = {
   },
   snow: {
     enable: true,
-    maxCount: 60,
-    speed: 1.2,
-    sizeMin: 2,
-    sizeMax: 8,
-    colorLight: '#ffffff',
-    colorDark: '#cce0ff'
+    maxCount: 40
   },
   nav: [
     { label: '首页', url: 'index.html', icon: '🏠' },

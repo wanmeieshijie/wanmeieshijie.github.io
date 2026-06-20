@@ -252,8 +252,9 @@ var Blog = {
       var html = '';
       for (var i = posts.length - 1; i >= 0; i--) {
         var p = posts[i];
-        html += '<article class="post-card" data-post="' + encodeURIComponent(p.file) + '">';
-        html += '<h2 class="post-card-title"><a href="javascript:;">' + p.title + '</a></h2>';
+        var encodedFile = encodeURIComponent(p.file);
+        html += '<article class="post-card" data-post="' + encodedFile + '">';
+        html += '<h2 class="post-card-title"><a href="?post=' + encodedFile + '">' + p.title + '</a></h2>';
         html += '<div class="post-card-meta">';
         html += '<span>' + this.formatDate(p.date) + '</span>';
         if (p.category) html += '<span class="tag" style="background:' + (this.getCategoryColor(p.category) || 'var(--tag-bg)') + '33">' + p.category + '</span>';
@@ -272,6 +273,7 @@ var Blog = {
       var cards = list.querySelectorAll('.post-card');
       for (var k = 0; k < cards.length; k++) {
         cards[k].addEventListener('click', function(e) {
+          e.preventDefault();
           var target = e.currentTarget;
           var file = decodeURIComponent(target.getAttribute('data-post'));
           if (file) Blog.renderPost(file);
@@ -286,16 +288,33 @@ var Blog = {
     if (listEl) listEl.style.display = '';
     if (contentEl) contentEl.style.display = 'none';
     document.title = document.title.split(' - ')[0] + ' - ' + (CONFIG.site.title || '');
+    this.restoreHero();
     this.renderHome();
+  },
+
+  restoreHero: function() {
+    if (typeof CONFIG === 'undefined' || !CONFIG.hero) return;
+    var heroTitle = document.querySelector('.hero-title');
+    if (heroTitle && CONFIG.hero.mainTitle) {
+      heroTitle.textContent = CONFIG.hero.mainTitle;
+    }
+    var heroSub = document.querySelector('.hero-sub');
+    if (heroSub) {
+      heroSub.style.display = '';
+    }
   },
 
   renderPost: function(postFile) {
     if (!postFile) return;
     var listEl = document.getElementById('post-list');
+    var archiveListEl = document.getElementById('archive-list');
+    var categoryListEl = document.getElementById('category-list');
     var contentEl = document.getElementById('post-content');
     var bodyEl = document.getElementById('post-body');
-    if (!listEl || !contentEl || !bodyEl) return;
-    listEl.style.display = 'none';
+    if (!contentEl || !bodyEl) return;
+    if (listEl) listEl.style.display = 'none';
+    if (archiveListEl) archiveListEl.style.display = 'none';
+    if (categoryListEl) categoryListEl.style.display = 'none';
     contentEl.style.display = 'block';
     bodyEl.innerHTML = '<div class="loading"></div>';
     this.loadMarkdown(postFile, function(content) {
@@ -307,9 +326,48 @@ var Blog = {
       bodyEl.innerHTML = '<article class="post-content">' + html + '</article>';
       document.title = document.title.split(' - ')[0] + ' - ' + postFile;
     }.bind(this));
+    var postTitle = '';
+    if (typeof POSTS_DATA !== 'undefined') {
+      for (var i = 0; i < POSTS_DATA.length; i++) {
+        if (POSTS_DATA[i].file === postFile) {
+          postTitle = POSTS_DATA[i].title;
+          break;
+        }
+      }
+    }
+    var heroTitle = document.querySelector('.hero-title');
+    if (heroTitle && postTitle) {
+      heroTitle.textContent = postTitle;
+    }
+    var heroSub = document.querySelector('.hero-sub');
+    if (heroSub) {
+      heroSub.style.display = 'none';
+    }
     var backBtn = document.getElementById('back-link');
     if (backBtn) {
       backBtn.onclick = function() { Blog.showList(); };
+    }
+    var backArchive = document.getElementById('back-link-archive');
+    if (backArchive) {
+      backArchive.onclick = function() {
+        var listEl = document.getElementById('archive-list');
+        var contentEl = document.getElementById('post-content');
+        if (listEl) listEl.style.display = '';
+        if (contentEl) contentEl.style.display = 'none';
+        document.title = '归档 - ' + (CONFIG.site.title || '');
+        Blog.restoreHero();
+      };
+    }
+    var backCategory = document.getElementById('back-link-category');
+    if (backCategory) {
+      backCategory.onclick = function() {
+        var listEl = document.getElementById('category-list');
+        var contentEl = document.getElementById('post-content');
+        if (listEl) listEl.style.display = '';
+        if (contentEl) contentEl.style.display = 'none';
+        document.title = '分类 - ' + (CONFIG.site.title || '');
+        Blog.restoreHero();
+      };
     }
   },
 
@@ -337,17 +395,19 @@ var Blog = {
         html += '<ul class="archive-list">';
         for (var k = 0; k < years[yearKeys[y]].length; k++) {
           var p = years[yearKeys[y]][k];
-          html += '<li class="archive-item" data-post="' + encodeURIComponent(p.file) + '">';
+          var encodedFile = encodeURIComponent(p.file);
+          html += '<li class="archive-item" data-post="' + encodedFile + '">';
           html += '<span class="archive-date">' + p.date + '</span>';
-          html += '<a class="archive-title" href="javascript:;">' + p.title + '</a>';
+          html += '<a class="archive-title" href="?post=' + encodedFile + '">' + p.title + '</a>';
           html += '</li>';
         }
         html += '</ul>';
       }
       list.innerHTML = html;
-      var items = list.querySelectorAll('.archive-item[data-post]');
+      var items = list.querySelectorAll('.archive-item');
       for (var n = 0; n < items.length; n++) {
         items[n].addEventListener('click', function(e) {
+          e.preventDefault();
           var file = decodeURIComponent(this.getAttribute('data-post'));
           if (file) Blog.renderPost(file);
         });
@@ -360,6 +420,7 @@ var Blog = {
           if (listEl) listEl.style.display = '';
           if (contentEl) contentEl.style.display = 'none';
           document.title = '归档 - ' + (CONFIG.site.title || '');
+          Blog.restoreHero();
         };
       }
     }.bind(this));
@@ -392,21 +453,37 @@ var Blog = {
         var cat = cats[catNames[j]];
         html += '<div class="cat-card">';
         html += '<div class="cat-card-header">';
+        html += '<span class="cat-expand">▶</span>';
         html += '<span class="cat-dot" style="background:' + cat.color + '"></span>';
         html += '<span class="cat-card-name">' + cat.name + '</span>';
         html += '<span class="cat-card-count">' + cat.posts.length + ' 篇</span>';
         html += '</div>';
-        html += '<ul class="cat-card-posts">';
+        html += '<ul class="cat-card-posts" style="display:none">';
         for (var k = 0; k < cat.posts.length; k++) {
-          html += '<li data-post="' + encodeURIComponent(cat.posts[k].file) + '"><a href="javascript:;">' + cat.posts[k].title + '</a></li>';
+          var encodedFile = encodeURIComponent(cat.posts[k].file);
+          html += '<li data-post="' + encodedFile + '"><a href="?post=' + encodedFile + '">' + cat.posts[k].title + '</a></li>';
         }
         html += '</ul></div>';
       }
       html += '</div>';
       list.innerHTML = html;
-      var items = list.querySelectorAll('[data-post]');
-      for (var n = 0; n < items.length; n++) {
-        items[n].addEventListener('click', function(e) {
+      var headers = list.querySelectorAll('.cat-card-header');
+      for (var n = 0; n < headers.length; n++) {
+        headers[n].addEventListener('click', function(e) {
+          var expandIcon = this.querySelector('.cat-expand');
+          var postsList = this.parentNode.querySelector('.cat-card-posts');
+          if (postsList) {
+            var isHidden = postsList.style.display === 'none';
+            postsList.style.display = isHidden ? '' : 'none';
+            if (expandIcon) expandIcon.textContent = isHidden ? '▼' : '▶';
+          }
+        });
+      }
+      var items = list.querySelectorAll('.cat-card-posts [data-post]');
+      for (var m = 0; m < items.length; m++) {
+        items[m].addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
           var file = decodeURIComponent(this.getAttribute('data-post'));
           if (file) Blog.renderPost(file);
         });
@@ -419,6 +496,7 @@ var Blog = {
           if (listEl) listEl.style.display = '';
           if (contentEl) contentEl.style.display = 'none';
           document.title = '分类 - ' + (CONFIG.site.title || '');
+          Blog.restoreHero();
         };
       }
     });

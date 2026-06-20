@@ -19,7 +19,7 @@ blog-main/
 │   └── style.css     # 全局样式（响应式 + 童趣风格）
 ├── js/
 │   ├── config.js     # 配置文件（修改个人信息、雪景参数等）
-│   ├── snow.js       # 雪景动画（Canvas 原生实现）
+│   ├── snow.js       # ❄️ 雪花动画（DOM 渲染）
 │   └── main.js       # 核心功能（主题切换、导航、Markdown 渲染等）
 ├── posts/            # 文章目录
 │   ├── posts.json    # 文章元数据（标题、日期、分类、摘要）
@@ -78,7 +78,7 @@ blog-main/
 |------|------|
 | 📱 响应式布局 | 手机、平板、电脑自适应 |
 | 🌗 深色/浅色模式 | 一键切换，自动记忆偏好 |
-| ❄️ 雪景动画 | Canvas 原生实现，参数可配置 |
+| ❄️ 雪景动画 | ❄️ 字符 DOM 渲染，参数可配置 |
 | 📝 Markdown 渲染 | 原生 JS 解析，无第三方依赖 |
 | 🏷️ 分类/归档 | 按分类和日期整理文章 |
 | 🎨 童趣风格 | 圆角、柔和阴影、温暖配色 |
@@ -91,12 +91,7 @@ blog-main/
 ```javascript
 snow: {
   enable: true,       // 开启雪景
-  maxCount: 60,       // 最大雪花数
-  speed: 1.2,         // 飘落速度
-  sizeMin: 2,         // 最小雪花大小
-  sizeMax: 8,         // 最大雪花大小
-  colorLight: "#ffffff",  // 浅色模式颜色
-  colorDark: "#cce0ff"    // 深色模式颜色
+  maxCount: 40        // 最大雪花数量（默认 40）
 }
 ```
 
@@ -106,7 +101,7 @@ snow: {
 
 - **HTML5 + CSS3** — 语义化结构 + CSS 变量主题系统
 - **原生 JavaScript** — 零依赖，性能轻量
-- **Canvas API** — 雪景动画渲染
+- **DOM 操作 + requestAnimationFrame** — ❄️ 雪花动画渲染
 - **GitHub Pages** — 静态托管
 
 ## 许可
