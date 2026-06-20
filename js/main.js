@@ -68,56 +68,61 @@ var Blog = {
     }
   },
 
+  getQueryParam: function(name) {
+    var search = window.location.search.substring(1);
+    if (!search) return null;
+    var parts = search.split('&');
+    for (var i = 0; i < parts.length; i++) {
+      var kv = parts[i].split('=');
+      if (kv[0] === name) return decodeURIComponent(kv[1] || '');
+    }
+    return null;
+  },
+
   renderPage: function() {
     var pageType = document.body.getAttribute('data-page');
+    var postFile = this.getQueryParam('post');
     if (pageType === 'home') {
-      this.renderHome();
-    } else if (pageType === 'post') {
-      this.renderPost();
+      if (postFile) {
+        this.renderPost(postFile);
+      } else {
+        this.renderHome();
+      }
     } else if (pageType === 'archive') {
-      this.renderArchive();
+      if (postFile) {
+        this.renderPost(postFile);
+      } else {
+        this.renderArchive();
+      }
     } else if (pageType === 'category') {
-      this.renderCategory();
+      if (postFile) {
+        this.renderPost(postFile);
+      } else {
+        this.renderCategory();
+      }
     } else if (pageType === 'about') {
       this.renderAbout();
     }
   },
 
   getPosts: function(callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'posts/posts.json?' + Date.now(), true);
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        try {
-          var posts = JSON.parse(xhr.responseText);
-          callback(posts);
-        } catch(e) {
-          callback([]);
-        }
-      } else {
-        callback([]);
-      }
-    };
-    xhr.onerror = function() {
-      callback([]);
-    };
-    xhr.send();
+    if (typeof POSTS_DATA !== 'undefined' && POSTS_DATA) {
+      callback(POSTS_DATA);
+      return;
+    }
+    callback([]);
   },
 
-  loadMarkdown: function(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        callback(xhr.responseText);
-      } else {
-        callback(null);
+  loadMarkdown: function(filename, callback) {
+    if (typeof POSTS_DATA !== 'undefined') {
+      for (var i = 0; i < POSTS_DATA.length; i++) {
+        if (POSTS_DATA[i].file === filename) {
+          callback(POSTS_DATA[i].content || null);
+          return;
+        }
       }
-    };
-    xhr.onerror = function() {
-      callback(null);
-    };
-    xhr.send();
+    }
+    callback(null);
   },
 
   renderMarkdown: function(text) {
@@ -241,14 +246,14 @@ var Blog = {
     if (!list) return;
     this.getPosts(function(posts) {
       if (posts.length === 0) {
-        list.innerHTML = '<div class="loading" style="text-align:center;padding:40px;color:var(--text-light)">暂无文章，请添加 .md 文件到 posts 目录</div>';
+        list.innerHTML = '<div class="loading" style="text-align:center;padding:40px;color:var(--text-light)">暂无文章，请添加文章数据到 posts-data.js</div>';
         return;
       }
       var html = '';
       for (var i = posts.length - 1; i >= 0; i--) {
         var p = posts[i];
-        html += '<article class="post-card">';
-        html += '<h2 class="post-card-title"><a href="?post=' + encodeURIComponent(p.file) + '">' + p.title + '</a></h2>';
+        html += '<article class="post-card" data-post="' + encodeURIComponent(p.file) + '">';
+        html += '<h2 class="post-card-title"><a href="javascript:;">' + p.title + '</a></h2>';
         html += '<div class="post-card-meta">';
         html += '<span>' + this.formatDate(p.date) + '</span>';
         if (p.category) html += '<span class="tag" style="background:' + (this.getCategoryColor(p.category) || 'var(--tag-bg)') + '33">' + p.category + '</span>';
@@ -264,24 +269,48 @@ var Blog = {
         html += '</article>';
       }
       list.innerHTML = html;
+      var cards = list.querySelectorAll('.post-card');
+      for (var k = 0; k < cards.length; k++) {
+        cards[k].addEventListener('click', function(e) {
+          var target = e.currentTarget;
+          var file = decodeURIComponent(target.getAttribute('data-post'));
+          if (file) Blog.renderPost(file);
+        });
+      }
     }.bind(this));
   },
 
-  renderPost: function() {
-    var params = new URLSearchParams(window.location.search);
-    var postFile = params.get('post');
+  showList: function() {
+    var listEl = document.getElementById('post-list');
+    var contentEl = document.getElementById('post-content');
+    if (listEl) listEl.style.display = '';
+    if (contentEl) contentEl.style.display = 'none';
+    document.title = document.title.split(' - ')[0] + ' - ' + (CONFIG.site.title || '');
+    this.renderHome();
+  },
+
+  renderPost: function(postFile) {
     if (!postFile) return;
-    var container = document.getElementById('post-content');
-    if (!container) return;
-    this.loadMarkdown('posts/' + postFile, function(content) {
+    var listEl = document.getElementById('post-list');
+    var contentEl = document.getElementById('post-content');
+    var bodyEl = document.getElementById('post-body');
+    if (!listEl || !contentEl || !bodyEl) return;
+    listEl.style.display = 'none';
+    contentEl.style.display = 'block';
+    bodyEl.innerHTML = '<div class="loading"></div>';
+    this.loadMarkdown(postFile, function(content) {
       if (content === null) {
-        container.innerHTML = '<div class="loading">文章加载失败</div>';
+        bodyEl.innerHTML = '<div class="loading">文章数据未找到</div>';
         return;
       }
       var html = this.renderMarkdown(content);
-      container.innerHTML = html;
-      document.title = document.title + ' - ' + postFile;
+      bodyEl.innerHTML = '<article class="post-content">' + html + '</article>';
+      document.title = document.title.split(' - ')[0] + ' - ' + postFile;
     }.bind(this));
+    var backBtn = document.getElementById('back-link');
+    if (backBtn) {
+      backBtn.onclick = function() { Blog.showList(); };
+    }
   },
 
   renderArchive: function() {
@@ -308,14 +337,31 @@ var Blog = {
         html += '<ul class="archive-list">';
         for (var k = 0; k < years[yearKeys[y]].length; k++) {
           var p = years[yearKeys[y]][k];
-          html += '<li class="archive-item">';
+          html += '<li class="archive-item" data-post="' + encodeURIComponent(p.file) + '">';
           html += '<span class="archive-date">' + p.date + '</span>';
-          html += '<a class="archive-title" href="?post=' + encodeURIComponent(p.file) + '">' + p.title + '</a>';
+          html += '<a class="archive-title" href="javascript:;">' + p.title + '</a>';
           html += '</li>';
         }
         html += '</ul>';
       }
       list.innerHTML = html;
+      var items = list.querySelectorAll('.archive-item[data-post]');
+      for (var n = 0; n < items.length; n++) {
+        items[n].addEventListener('click', function(e) {
+          var file = decodeURIComponent(this.getAttribute('data-post'));
+          if (file) Blog.renderPost(file);
+        });
+      }
+      var backBtn = document.getElementById('back-link-archive');
+      if (backBtn) {
+        backBtn.onclick = function() {
+          var listEl = document.getElementById('archive-list');
+          var contentEl = document.getElementById('post-content');
+          if (listEl) listEl.style.display = '';
+          if (contentEl) contentEl.style.display = 'none';
+          document.title = '归档 - ' + (CONFIG.site.title || '');
+        };
+      }
     }.bind(this));
   },
 
@@ -352,12 +398,29 @@ var Blog = {
         html += '</div>';
         html += '<ul class="cat-card-posts">';
         for (var k = 0; k < cat.posts.length; k++) {
-          html += '<li><a href="?post=' + encodeURIComponent(cat.posts[k].file) + '">' + cat.posts[k].title + '</a></li>';
+          html += '<li data-post="' + encodeURIComponent(cat.posts[k].file) + '"><a href="javascript:;">' + cat.posts[k].title + '</a></li>';
         }
         html += '</ul></div>';
       }
       html += '</div>';
       list.innerHTML = html;
+      var items = list.querySelectorAll('[data-post]');
+      for (var n = 0; n < items.length; n++) {
+        items[n].addEventListener('click', function(e) {
+          var file = decodeURIComponent(this.getAttribute('data-post'));
+          if (file) Blog.renderPost(file);
+        });
+      }
+      var backBtn = document.getElementById('back-link-category');
+      if (backBtn) {
+        backBtn.onclick = function() {
+          var listEl = document.getElementById('category-list');
+          var contentEl = document.getElementById('post-content');
+          if (listEl) listEl.style.display = '';
+          if (contentEl) contentEl.style.display = 'none';
+          document.title = '分类 - ' + (CONFIG.site.title || '');
+        };
+      }
     });
   },
 
